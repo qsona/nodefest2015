@@ -83,7 +83,7 @@ Nodeアプリ起動時にDBから読み込み、整形してプロセス上の�
 ex) Quest マスタ
 ```javascript
 { 'quest01': { quest_id: 'quest01', map_id: 'map01', tasks: [ ... ] },
-  'quest02': { quest_id: 'quest02', map_id: 'map05', tasks: [ ... ] } }
+  'quest02': { quest_id: 'quest02', map_id: 'map02', tasks: [ ... ] } }
 ```
 
 ---
@@ -116,10 +116,11 @@ ex) Quest マスタ
 
 ---
 1
-neo-async.angelFall
+非同期フロー制御に関する戦いと成果
+〜neo-async.angelFallに至るまで〜
 
 ---
-# neo-async.angelFall
+# 非同期フロー制御に関する戦いと成果
 Bad度★☆☆☆☆
 Node度★★★★★
 ゲーム度★★☆☆☆
@@ -128,7 +129,8 @@ Node度★★★★★
 ---
 # 概要
 
-非同期フロー制御に関する戦い
+非同期フロー制御に関する戦いと
+それにより得られた ベスト(？)プラクティス
 
 ---
 # Node.jsの規約
@@ -148,12 +150,11 @@ callback sucks
 # 非同期コード(plain)の問題点
 - if (err) 句が無駄に多い
 - ネストが深くなる
-- 並列に走らせ、全て終わったら次に行く、のようなコードが書きにくい
 
 ---
 # 非同期フロー制御
 
-非同期フローを制御するモジュールが、問題を解決する
+非同期フローを制御するモジュールにより、問題を解決する
 
 弊社では async (Github: caolan/async) を利用してきた
 
@@ -166,7 +167,7 @@ callback sucks
 - async.series
 - async.auto
 
-弊社ではasync.seriesが主流だった
+弊社では長らくasync.seriesが主流だった
 
 ---
 # async.series コード例
@@ -184,6 +185,7 @@ async.waterfallにしてみた
 
 ---
 # async.waterfallの動作解説
+コード例1, 2
 
 ---
 # async.waterfallの問題点
@@ -192,6 +194,17 @@ async.waterfallにしてみた
 - コールバックする引数の個数を増やすことがbreaking changeに繋がる
 
 bad!!
+
+コード例
+
+---
+# 問題になる理由
+callbackが「最後」の引数に渡されることにより、問題が発生している
+
+もし「最初」ならこのような問題は起きない
+
+---
+コード例
 
 ---
 # neo-async
@@ -205,6 +218,9 @@ bad!!
 
 - async.waterfallと基本的には同じ
 - next に渡される引数の個数が変わっても、次の関数に入る引数の個数が変わらない
+
+---
+コード例
 
 ---
 # 技術的背景
@@ -386,7 +402,7 @@ JavaScriptの旨味がある
 ---
 # グローバル変数 Date の上書き
 
-|a|b|
+|この表組み|どうしよう|
 |--------|------|
 |Bad度   |★★☆☆☆ |
 |Node度  |★★★☆☆ |
