@@ -1,6 +1,5 @@
 class: center, middle
-
-# .fs-l[Node.jsでのゲームサーバ開発]<br>.fs-m[愛すべきバッドノウハウ3選]
+# .fs-m[Node.jsでのゲームサーバ開発]<br>.fs-l[愛すべきバッドノウハウ3選]
 
 ---
 # はじめに
@@ -11,11 +10,10 @@ class: center, middle
 Node.jsを採用しませんか？
 ]
 
-- 例えば、PHPの代わりにNode.js
+- 例えば、PHP~~を避ける~~の代わりにNode.js
 
 ---
 # 「フツウに良い」Node.js
-左右に箇条書き分けたい&フォント小さくしたい
 .col-4[
 - 速い
 - 楽しい
@@ -29,21 +27,20 @@ Node.jsを採用しませんか？
 - etc
 ]
 
-「一旦Nodeでいいじゃん」の流れをつくりたい
-
-- 国内の採用事例はまだまだ少ない
+- 「一旦Nodeでいいじゃん」の流れをつくりたい
+  - 国内の採用事例はまだまだ少ない
 
 ---
-# 旧仮説
+# 先月の仮説
 
-学習コストが高いのでは？
+.fs-m[学習コストが高いのでは？]
 
-東京Node学園18時限目LT<br>
+- 東京Node学園18時限目 LT<br>
 「チーム開発においてNode未経験者の学習コストを下げる工夫」
 
 ---
-# 新仮説
-Node.js、サーバサイド開発に向いてないのでは？
+# 今日の仮説
+.fs-m[Node.js、サーバサイド開発に向いてないのでは？]
 
 ---
 https://twitter.com/teppeis/status/545940492219727873
@@ -51,17 +48,25 @@ http://mizchi.hatenablog.com/entry/2014/10/08/003228
 
 ---
 # 唐突に自己紹介
+.list-l[
 - サイバーエージェント所属
 - Node.jsでゲームのサーバ開発中
 - Node.js歴=職業プログラマ歴=2年半
+]
+
+Nodeしか業務経験がない件
 
 ---
-いかにNodeがWebアプリ開発に向いているか熱弁したい！
-他を知らない
-「よくない」「辛い」と感じるところを考察することはできるのでは？
+# モチベーション
+.list-m[
+- いかにNodeがWebアプリ開発に向いているか熱弁したい！
+- 他を知らない
+- 「よくない」「辛い」と感じるところを<br>
+  考察することはできるのでは？
+]
 
 ---
-# 注意点
+# 本セッションのコンテキスト
 - ゲームのAPIサーバ開発に限って論じる
   - 特にソーシャルゲームを想定
   - サーバ開発一般に通じる話が多いはず
@@ -74,7 +79,8 @@ http://mizchi.hatenablog.com/entry/2014/10/08/003228
 > <cite>http://0xcc.net/misc/bad-knowhow.html</cite>
 
 ここでは
-- TODO, 定義する
+- あまり覚えたくないノウハウ
+- 本来やりたくない(けど仕方ない)手法
 
 ---
 # 本題の前に
@@ -92,8 +98,9 @@ http://mizchi.hatenablog.com/entry/2014/10/08/003228
 ---
 # マスターデータとは
 ゲームそのものに関してのデータ
-- 運営側が用意するもの
 - クエスト、イベント、敵、マップ、などなど
+- 運営側が用意するもの
+- 個々のユーザとは紐付かない
 
 ---
 # .fs-l[マスターデータにまつわる話]
@@ -111,18 +118,17 @@ http://mizchi.hatenablog.com/entry/2014/10/08/003228
 
 ゲーム開発はマスターデータ無しには語れない
 
-参考: Final Fantasy Record Keeperのマスターデータを支える技術 (DeNA 渋川さん)
-http://www.slideshare.net/dena_study/final-fantasy-record-keeper
+例: Final Fantasy Record Keeperのマスターデータを支える技術 (DeNA 渋川さん)<br>
+  http://www.slideshare.net/dena_study/final-fantasy-record-keeper
 
-入力支援の話は上の記事で語り尽くされている
-
-サーバアプリケーション上での利用の話を少ししたい
+Node.jsサーバアプリ上での利用の話を少しする
 
 ---
 # マスターデータの利用
 Nodeアプリ起動時にDBから読み込み、整形してプロセス上のオブジェクトとして乗せる
 - 通常の量なら十分乗る
 - IDをキーにする
+  - 99%くらい(?)はIDで引く
 
 ex) Quest マスタ
 ```javascript
@@ -143,6 +149,20 @@ ex) Quest マスタ
 # 注意点と対策
 
 注意点:
+- DBと違い、index がない
+  - 大量にデータが有り、ID以外で引く場合に問題になる
+
+対策:
+- 起動時にソートし、別に保持
+  - indexの代わり
+
+- クエリが固定なら、起動時に検索を行い<br>
+それを保持
+
+---
+# 注意点と対策 (2)
+
+注意点:
 - 誤って書き換えてしまう可能性がある
   - ただのJavaScript上のオブジェクトなので。。
   - やらかして障害にした経験あり
@@ -153,17 +173,18 @@ ex) Quest マスタ
   - 変更しようとした瞬間にTypeError
 
 ---
-
-ここまでグッドノウハウ
-
----
-
-ここからバッドノウハウ
+class: center, middle
+# .fs-l[ここまでグッドノウハウ]
 
 ---
-1
-非同期フロー制御に関する戦い
-〜neo-async.angelFallに至るまで〜
+class: center, middle
+# .fs-l[ここからバッドノウハウ]
+
+---
+class: center, middle
+# .fs-m[BAD No.1]
+# .fs-l[非同期フロー制御に関する戦い<br>]
+# .fs-m[〜neo-async.angelFallに至るまで〜]
 
 ---
 # .fs-m[非同期フロー制御に関する戦い<br>〜neo-async.angelFallに至るまで〜]
@@ -177,6 +198,8 @@ Node度★★★★★
 
 非同期フロー制御に関する戦いと<br>
 それにより得られたノウハウ
+
+注: 今から7分間、とてもニッチな話をします
 
 ---
 # Node.jsの規約
@@ -237,12 +260,17 @@ async.waterfallにしてみた
 ---
 # async.waterfallの問題点
 
-- next に渡される引数の個数に応じて、次の関数に入る引数の個数が変わる
-- コールバックする引数の個数を増やすことがbreaking changeに繋がる
+next に渡される引数の個数に応じて、次の関数に入る引数の個数が変わる
 
-bad!!
+↓
 
+コールバックする引数の個数を増やすことが<br>
+Breaking Changeに繋がる
+
+---
 コード例
+
+BAD
 
 ---
 # 問題になる理由
@@ -258,7 +286,8 @@ callbackが「最後」の引数に渡されることにより、問題が発生
 
 - asyncのクローン
 - 機能を増やし、速度を向上させている
-- 弊社エンジニア @suguru03 がフルスクラッチで作成
+- 元弊社エンジニア @suguru03 がフルスクラッチで作成
+  - 本日カナダに飛ぶようです
 
 ---
 # neo-async.angelFall
@@ -298,6 +327,9 @@ BAD!!
 
 ---
 # 結論
+
+まさに"覚えたくないノウハウ"の集まり
+
 我々は非同期フロー制御で疲弊している
 
 こんなふうに書きたい: asyncblock (Github: scriby/asyncblock)
@@ -306,8 +338,6 @@ BAD!!
 # asyncblock
 コード例sync, defer
 
----
-# asyncblock
 - deferした場合、その結果が次に使われるところで処理を待つ
 - asyncだと `async.auto` が少し近い
 
@@ -333,8 +363,9 @@ BAD!!
 決定版はまだ無いように思う
 
 ---
-2
-Fat Service, Skinny Model
+class: center, middle
+# .fs-m[BAD No.2]
+# .fs-l[Fat Service, Skinny Model]
 
 ---
 # Fat Service, Skinny Model
@@ -405,34 +436,35 @@ DBアクセスで、単なるデータオブジェクトを受け取る
 ---
 (sample code)
 
-簡単なことをやる場合にも毎度これをするのは大変
+面倒
 
 ---
 # モデルを作るメリットが薄い
 
-- 特にソーシャルゲーム的な話
-- 複数のデータを集めてきてごにょごにょする仕様が多い
-- あるものを一つの「モデル」の対象として考察する必然性があまりない
+特にソーシャルゲーム的な話
+- 複数のデータを集めてきてごにょごにょ…する仕様が多い
+- あるものを一つの「モデル」の対象として考察する必要性が薄い
 
 ---
 # .fs-m[非同期処理がモデルに混ざると辛い問題]
 コールバックスタイルが、オブジェクト指向と壊滅的にマッチしない
 
-- オブジェクト生成前に全部用意する？
-  - まれにしか使われない附帯的な非同期呼び出しでも?
-  - 重い時に最悪setImmediate、とかも出来なくなる
+一つ非同期メソッドがあれば、全部非同期メソッドになる覚悟が必要
+
+- メソッド継承したある子だけ、非同期呼び出しが必要なときは？
 
 ---
-# .fs-m[非同期処理がモデルに混ざると辛い問題]
-コールバックスタイルが、オブジェクト指向と壊滅的にマッチしない
+# 非同期呼び出しが出来ないと
+- オブジェクト生成前に、全部データを用意しなければならない
+  - まれにしか使われない附帯的なデータであっても
 
-- 一つ非同期メソッドがあれば、全部非同期メソッドになる覚悟が必要
-  - メソッド継承したある子だけ、非同期呼び出しが必要なときは？
+- 外部APIを叩けない
+  - ex. モデルが生成するワードのNG check
+
+- 重い処理にsetImmediateをはさむのも出来ない
 
 ---
-# まとめると
-
-結構、多くの問題がある
+# 問題が多い
 
 services/ に全部書くのが80%の場合楽
 
@@ -453,8 +485,14 @@ services/ に全部書くのが80%の場合楽
 - JavaScriptの旨味がある
 
 ---
-2.5
-グローバル変数の上書き
+# まとめ
+
+オブジェクト指向と非同期呼び出しにミスマッチの問題がある
+
+---
+class: center, middle
+# .fs-m[BAD No.2.5]
+# .fs-l[グローバル変数の上書き]
 
 ---
 # グローバル変数 Date の上書き
@@ -525,9 +563,11 @@ prototype拡張ではなく、上書きじゃないとダメ
 - TimeMaster.forward() で時刻をずらす
 - TimeMaster.overwrite() でグローバル変数上書き
 
+Fork & Star me on Github!!
+
 ---
 # 問題点
-ログの時間までずれる
+吐き出すログの時間までずれる
 
 対策: ログ吐く関数を以下のように書き換える
 - ログ吐く瞬間だけ、時間戻す
@@ -598,10 +638,10 @@ Node.jsにおいて例外がthrowされた場合、プロセスが終了する
 - cluster利用時は、発生したworkerが終了
 普通は、終了を検知して再起動する(pm2など)
 
----
-# 問題
+![不正な処理](http://homepage2.nifty.com/t-okano/rok/rok/lecture/errwin1.gif)
 
-再起動に時間がかかる
+---
+# 再起動に時間がかかる
 
 特にマスターデータの影響
 - DBから読み込んでプロセスにのせる
@@ -609,10 +649,31 @@ Node.jsにおいて例外がthrowされた場合、プロセスが終了する
 - Object.freezeをdeepに行う
 
 ---
-(image)
+# とある日のstg起動ログ(抜粋)
+
+```
+19:53:51 info initialize modules
+19:53:52 info configure master cache
+19:53:52 info loading master cache
+19:53:55 info [masterchanger] change masterdata: enemy
+19:53:55 info [masterchanger] change masterdata: gacha
+19:53:56 info [masterchanger] added master: combination_skill_hash
+19:53:56 info [masterchanger] added master: item_by_type
+19:53:56 warn [masterchanger] deleted 34 keys from notice
+19:53:57 warn [masterchanger] added 2820 keys to enemy_skill
+19:53:57 info loading master cache and changing master: done. time: 4882 ms
+19:53:57 info freezing master
+19:54:11 info freezing master: done. time: 14253 ms
+19:54:12 info Start to initialize NewRelic.
+19:54:13 info server started
+```
+
+- キャッシュへの読み込みに3秒
+- キャッシュの変形に2秒
+- Object.freezeに14秒
 
 ---
-# 問題 (2)
+# 問題
 
 1. あるユーザのデータが壊れる + バグによりTypeError発生
 2. そのユーザがリクエストする度に発生する
@@ -625,7 +686,7 @@ Node.jsにおいて例外がthrowされた場合、プロセスが終了する
 エラーが起きても、プロセスを終了しないようにしたい
 
 ---
-# やり方
+# やり方 1
 uncaughtExceptionをハンドルする
 
 起動時に呼ばれるコードで
@@ -655,25 +716,34 @@ function(req, res, next) {
 ```
 
 ---
-# 比較
+# やり方1と2の比較
 - domain を使うとリクエストの情報が落ちないで済む
   - ちゃんとレスポンスを返せる
   - ユーザ情報をログに出せる
 
 ---
+# だめ 1
+![](./img/uncaught.png)
+<cite>https://nodejs.org/api/process.html#process_event_uncaughtexception</cite>
+
+---
+# だめ 2
+![](./img/domain.png)
+<cite>https://nodejs.org/api/domain.html#domain_warning_don_t_ignore_errors</cite>
+
+---
+# だめ 3
+
+Error Handling in Node.js
+<cite>https://www.joyent.com/developers/node/design/errors</cite>
+
+Joyent 公式のドキュメント
+
+---
 # Why BAD?
 何由来か全く不明なエラーを、握りつぶしている
 
-正しい方法<br>
-![不正な処理](http://homepage2.nifty.com/t-okano/rok/rok/lecture/errwin1.gif)
-
 ---
-https://nodejs.org/api/process.html#process_event_uncaughtexception
-https://nodejs.org/api/domain.html#domain_warning_don_t_ignore_errors
-https://www.joyent.com/developers/node/design/errors
-
----
-# だめ
 だめといわれても
 
 ---
