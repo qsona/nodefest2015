@@ -1,6 +1,6 @@
 class: center, middle
 
-# Node.jsでのゲームサーバ開発 愛すべきバッドノウハウ3選
+# .fs-l[Node.jsでのゲームサーバ開発]<br>.fs-m[愛すべきバッドノウハウ3選]
 
 ---
 # まだ
@@ -52,7 +52,7 @@ http://0xcc.net/misc/bad-knowhow.html
 - クエスト、イベント、敵、マップ、などなど
 
 ---
-# マスターデータにまつわる話 (1)
+# .fs-l[マスターデータにまつわる話 (1)]
 - 入力支援 (管理画面、スプレッドシート等)
   - 入力はエンジニア以外が行うことが多い
   - 入力をやりやすくするのはとっても重要
@@ -63,7 +63,7 @@ http://0xcc.net/misc/bad-knowhow.html
 弊社ゲームの障害のうちの約8割(推定)はマスターデータが原因
 
 ---
-# マスターデータにまつわる話 (2)
+# .fs-l[マスターデータにまつわる話 (2)]
 
 ゲーム開発はマスターデータ無しには語れない
 
@@ -231,7 +231,7 @@ callbackが「最後」の引数に渡されることにより、問題が発生
 やや黒魔術
 
 ---
-# async.waterfall / neo-async.angelFall の問題点
+# .fs-l[async.waterfall /<br> neo-async.angelFall の問題点]
 
 - 関数の区切りが意味の区切りにならないことがある
   - フローにif文が入ると辛い
@@ -520,7 +520,7 @@ process.on('uncaughtException')
 ...そして何もなかったように続行
 
 ---
-# process.on('uncaughtException')
+# .fs-m[process.on('uncaughtException')]
 ...そして何もなかったように続行
 Bad度★★★★★
 Node度★★★★★
