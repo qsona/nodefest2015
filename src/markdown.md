@@ -211,10 +211,38 @@ callback スタイル
 
 ---
 # 同期コード例
+```javascript
+function sample_sync(param) {
+  var num = getNumberSync(param);
+  var text = generateTextSync(num);
+  checkNgWordSync(text2);
+  return { num: num, text: test };
+}
+```
 
+このコードが、非同期呼び出しになるとどうなるか見ていく
 ---
 # 非同期コード(plain)例
-callback sucks
+```javascript
+function sample_plain(param, callback) {
+  getNumber(function(err, num) {
+    if (err) {
+      return callback(err);
+    }
+    generateText(num, function(err, text) {
+      if (err) {
+        return callback(err);
+      }
+      checkNgWord(text, function(err) {
+        if (err) {
+          return callback(err);
+        }
+        callback(null, { num: num, text: text });
+      });
+    });
+  });
+};
+```
 
 ---
 # 非同期コード(plain)の問題点
@@ -239,23 +267,103 @@ callback sucks
 
 弊社では長らくasync.seriesが主流だった
 
+次から出るコードの注意点
+- `var async = require('async');`は省略
+- 定義されていない関数は、非同期メソッドとして定義されているものとする
+
 ---
-# async.series コード例
+# .fs-m[async.series コード例]
+```javascript
+function sample_series(param, callback) {
+  var num, text;
+  async.series([
+    function(next) {
+      getNumber(param, function(err, _num) {
+        if (err) {
+          return next(err);
+        }
+        num = _num;
+        next();
+      });
+    },
+    function(next) {
+      generateText(num, function(err, _text) {
+        if (err) {
+          return next(err);
+        }
+        text = _text;
+        next();
+      });
+    },
+    function(next) {
+      checkNgWord(text, next);
+    }
+  ], function(err) {
+    if (err) {
+      return callback(err);
+    }
+    callback(null, { num: num, text: text });
+  });
+}
+```
 
 ---
 # async.seriesの問題点
-`if (err)` 多すぎ
+- `if (err)` が減ってない
+- ネストは減ったが、コード量が増えすぎ
 
 async.waterfallにしてみた
 
 ---
 # async.waterfall コード例
+```javascript
+function sample_waterfall(param, callback) {
+  var num, text;
+  async.waterfall([
+    function(next) {
+      getNumber(param, next);
+    },
+    function(_num, next) {
+      num = _num;
+      generateText(num, next);
+    },
+    function(_text, next) {
+      text = _text;
+      checkNgWord(text, next);
+    },
+    function(next) {
+      next(null, { num: num, text: text });
+    }
+  ], callback);
+}
+```
 
 `if (err)` がなくなり、コードが短くなった
 
 ---
 # async.waterfallの動作解説
-コード例1, 2
+
+```javascript
+function sample_waterfall1(param, callback) {
+  var num, text;
+  async.waterfall([
+    function(next) {
+      next(null, 1);
+    },
+    function(_num, next) {
+      num = _num;
+      next(null, 'text');
+    },
+    function(_text, next) {
+      text = _text;
+      next();
+    },
+    function(next) {
+      next(null, { num: num, text: text });
+    }
+  ], callback);
+}
+```
 
 ---
 # async.waterfallの問題点
@@ -268,26 +376,98 @@ next に渡される引数の個数に応じて、次の関数に入る引数の
 Breaking Changeに繋がる
 
 ---
-コード例
+# コード例(OK)
+```
+function checkNgWord(text, callback) {
+* callback();
+}
 
-BAD
+function sample_waterfall(param, callback) {
+  var num, text;
+  async.waterfall([
+    function(next) {
+      getNumber(param, next);
+    },
+    function(_num, next) {
+      num = _num;
+      generateText(num, next);
+    },
+    function(_text, next) {
+      text = _text;
+      checkNgWord(text, next);
+    },
+*   function(next) {
+      next(null, { num: num, text: text });
+    }
+  ], callback);
+}
+```
 
 ---
-# 問題になる理由
-callbackが「最後」の引数に渡されることにより、問題が発生している
+# コード例(動かない)
+```
+function checkNgWord(text, callback) {
+* callback(null, { /* detail */ });
+}
 
-もし「最初」ならこのような問題は起きない
+function sample_waterfall(param, callback) {
+  var num, text;
+  async.waterfall([
+    function(next) {
+      getNumber(param, next);
+    },
+    function(_num, next) {
+      num = _num;
+      generateText(num, next);
+    },
+    function(_text, next) {
+      text = _text;
+      checkNgWord(text, next);
+    },
+*   function(next) {
+      next(null, { num: num, text: text });
+    }
+  ], callback);
+}
+```
+
+`checkNgWord`の修正により、`sample_waterfall`が動かなくなっている
 
 ---
-コード例
+# コード例(修正後)
+```
+function checkNgWord(text, callback) {
+* callback(null, { /* detail */ });
+}
 
+function sample_waterfall(param, callback) {
+  var num, text;
+  async.waterfall([
+    function(next) {
+      getNumber(param, next);
+    },
+    function(_num, next) {
+      num = _num;
+      generateText(num, next);
+    },
+    function(_text, next) {
+      text = _text;
+      checkNgWord(text, next);
+    },
+*   function(unused, next) {
+      next(null, { num: num, text: text });
+    }
+  ], callback);
+}
+```
 ---
 # neo-async
 
+- Github: suguru03/neo-async
 - asyncのクローン
 - 機能を増やし、速度を向上させている
 - 元弊社エンジニア @suguru03 がフルスクラッチで作成
-  - 本日カナダに飛ぶようです
+  - 退職して語学留学へ、本日カナダに飛ぶようです
 
 ---
 # neo-async.angelFall
@@ -296,15 +476,41 @@ callbackが「最後」の引数に渡されることにより、問題が発生
 - next に渡される引数の個数が変わっても、次の関数に入る引数の個数が変わらない
 
 ---
-コード例
+# .fs-m[コード例(元: 動かない => 現: 動く)]
+```
+var async = require('neo-async');
 
+function checkNgWord(text, callback) {
+* callback(null, { /* detail */ });
+}
+
+function sample_angelFall(param, callback) {
+  var num, text;
+* async.angelFall([
+    function(next) {
+      getNumber(param, next);
+    },
+    function(_num, next) {
+      num = _num;
+      generateText(num, next);
+    },
+    function(_text, next) {
+      text = _text;
+      checkNgWord(text, next);
+    },
+*   function(next) {
+      next(null, { num: num, text: text });
+    }
+  ], callback);
+}
+```
 ---
 # 技術的背景
+Function.length を利用している
+- 定義された仮引数の個数が取れる
 - 次の関数が受ける、引数の個数を見ている
-  - Function.length を利用
-  - 定義された仮引数の個数が取れる
 
-やや黒魔術
+やや黒魔術に近い
 
 ---
 # .fs-m[async.waterfall /<br> neo-async.angelFall の問題点]
@@ -314,42 +520,68 @@ callbackが「最後」の引数に渡されることにより、問題が発生
 
 ---
 # 同期コード例
-
+```javascript
+function sample_sync(param) {
+  var x = getX(param);
+  if (x) {
+    var y = getY();
+    var z = getZ();
+    doSomething(y, z);
+  }
+  return getW(x);
+}
+```
 ---
-# 非同期コード(plain)例
+# 非同期コード例(良くない)
+```javascript
+var async = require('neo-async');
 
+function sample_async(param, callback) {
+  var x;
+  async.angelFall([
+    function(next) {
+      getX(param, next);
+    },
+    function(_x, next) {
+      x = _x;
+      if (!x) {
+        return next();
+      }
+      async.parallel({
+        y: getY,
+        z: getZ
+      }, next);
+    },
+    function(result, next) {
+      if (!x) {
+        return next();
+      }
+      doSomething(result.y, result.z, next);
+    },
+    function(next) {
+      getW(x, next):
+    }
+  ], callback);
+}
+```
 ---
-# .fs-m[async.waterfall /<br> neo-async.angelFall の例]
+# 良くない理由
 
-たまにGOTOみたいの欲しくなる
+同じif文が2つある
+- ネストをこれ以上深くしないためにしたが…
+- フローが分かりづらい
+- これからも同じif文が増える可能性、メンテ性悪い
+
+GOTOが欲しくなる
 
 BAD!!
 
 ---
-# 結論
+# まとめ
 
 まさに"覚えたくないノウハウ"の集まり
 
 我々は非同期フロー制御で疲弊している
-
-こんなふうに書きたい: asyncblock (Github: scriby/asyncblock)
-
----
-# asyncblock
-コード例sync, defer
-
-- deferした場合、その結果が次に使われるところで処理を待つ
-- asyncだと `async.auto` が少し近い
-
----
-# asyncblock の技術
-
-- node-fibers
-  - V8/Node自体の拡張
-- source transformation
-  - ASTを利用しコードを書き換えた上で実行している
-
-非常に黒魔術
 
 ---
 # 非同期フロー制御のこれから
@@ -361,6 +593,47 @@ BAD!!
 いずれも Promise(ES2015) 前提
 
 決定版はまだ無いように思う
+
+こんなふうに書きたい: asyncblock (Github: scriby/asyncblock)
+
+---
+# asyncblock
+コード例sync, defer
+
+- deferした場合、その結果が次に使われるところで処理を待つ
+  - asyncだと `async.auto` が少し近い
+
+---
+# コード例
+```javascript
+var asyncblock = require('asyncblock');
+
+function sample_asyncblock(param, callback) {
+  asyncblock(function(flow) {
+    flow.errorCallback = callback;
+
+    var x = getX(param).defer();
+    if (x) {
+      var y = getY().defer();
+      var z = getZ().defer();
+      doSomething(y, z).sync();
+    }
+    callback(null, getW(x).sync());
+  });
+}
+```
+
+---
+# asyncblock の技術
+
+- node-fibers
+  - V8/Node自体の拡張
+- source transformation
+  - ASTを利用しコードを書き換えた上で実行している
+
+非常に黒魔術
+
+正規なやり方で、このレベルになってほしい
 
 ---
 class: center, middle
@@ -432,11 +705,6 @@ DBアクセスで、単なるデータオブジェクトを受け取る
 - フロントへ返却する形に変換する処理
 - DBへの変換処理
   - ここはES5のsetterを上手いこと使えば不要にできるかも？
-
----
-(sample code)
-
-面倒
 
 ---
 # モデルを作るメリットが薄い
