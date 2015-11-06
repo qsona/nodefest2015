@@ -98,13 +98,152 @@ th, td {
 .fc-yellow {
     color: #ffeb3b;
 }
-
 .fc-black {
     color: #000000;
 }
-
 .fc-red {
     color: red;
+}
+
+/* margin utility classes */
+.m10-t {
+    margin-top: 10px !important;
+}
+.m20-t {
+    margin-top: 20px !important;
+}
+.m30-t {
+    margin-top: 30px !important;
+}
+.m40-t {
+    margin-top: 40px !important;
+}
+.m50-t {
+    margin-top: 50px !important;
+}
+.m60-t {
+    margin-top: 60px !important;
+}
+.m70-t {
+    margin-top: 70px !important;
+}
+.m80-t {
+    margin-top: 80px !important;
+}
+.m90-t {
+    margin-top: 90px !important;
+}
+.m100-t {
+    margin-top: 100px !important;
+}
+.m10-b {
+    margin-bottom: 10px !important;
+}
+.m20-b {
+    margin-bottom: 20px !important;
+}
+.m30-b {
+    margin-bottom: 30px !important;
+}
+.m40-b {
+    margin-bottom: 40px !important;
+}
+.m50-b {
+    margin-bottom: 50px !important;
+}
+.m60-b {
+    margin-bottom: 60px !important;
+}
+.m70-b {
+    margin-bottom: 70px !important;
+}
+.m80-b {
+    margin-bottom: 80px !important;
+}
+.m90-b {
+    margin-bottom: 90px !important;
+}
+.m100-b {
+    margin-bottom: 100px !important;
+}
+.m10-l {
+    margin-left: 10px !important;
+}
+.m20-l {
+    margin-left: 20px !important;
+}
+.m30-l {
+    margin-left: 30px !important;
+}
+.m40-l {
+    margin-left: 40px !important;
+}
+.m50-l {
+    margin-left: 50px !important;
+}
+.m60-l {
+    margin-left: 60px !important;
+}
+.m70-l {
+    margin-left: 70px !important;
+}
+.m80-l {
+    margin-left: 80px !important;
+}
+.m90-l {
+    margin-left: 90px !important;
+}
+.m100-l {
+    margin-left: 100px !important;
+}
+.m10-r {
+    margin-right: 10px !important;
+}
+.m20-r {
+    margin-right: 20px !important;
+}
+.m30-r {
+    margin-right: 30px !important;
+}
+.m40-r {
+    margin-right: 40px !important;
+}
+.m50-r {
+    margin-right: 50px !important;
+}
+.m60-r {
+    margin-right: 60px !important;
+}
+.m70-r {
+    margin-right: 70px !important;
+}
+.m80-r {
+    margin-right: 80px !important;
+}
+.m90-r {
+    margin-right: 90px !important;
+}
+.m100-r {
+    margin-right: 100px !important;
+}
+
+.kakuzuke {
+
+}
+.kakuzuke table {
+    font-size: 35px;
+}
+.kakuzuke thead {
+    display: none;
+}
+
+.kakuzuke td {
+    border: none;
+}
+
+.kakuzuke td:nth-child(1) {
+    font-weight: bold;
+    padding-right: 30px;
 }
 
 /**
