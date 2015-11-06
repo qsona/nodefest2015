@@ -4,23 +4,50 @@
 body {
     font-family: 'Noto Sans Japanese', "ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", "メイリオ", Meiryo, sans-serif;
 }
-h1, h2, h3 {
+h1 {
+    font-weight: bold;
+    color: #3f8c66;
+}
+.code-title {
+    font-weight: bold;
+    color: #3f8c66;
+    font-size: 30px;
+}
+h2, h3 {
     font-weight: bold;
 }
 h2 {
     font-size: 35px !important;
 }
 li {
+    margin-top: 20px;
     font-size: 30px;
 }
+li ul li {
+    margin-top: 16px;
+    font-size: 24px;
+}
 .list-l li {
-    margin-top: 50px;
+    margin-top: 27px;
     font-size: 40px;
 }
 .list-m li {
-    margin-top: 30px;
+    margin-top: 23px;
     font-size: 35px;
 }
+.list-m li ul li {
+    margin-top: 20px;
+    font-size: 30px;
+}
+.list-s li {
+    margin-top: 16px;
+    font-size: 24px;
+}
+.list-ss li {
+    margin-top: 1px;
+    font-size: 20px;
+}
+
 a {
     color: #79B5F2;
     text-decoration: none;
@@ -40,6 +67,10 @@ th {
 th, td {
     border: 1px solid white;
     padding: 10px;
+}
+
+cite {
+    font-size: 20px;
 }
 
 /**
@@ -81,15 +112,21 @@ th, td {
     margin-right: 2%;
 }
 .fs-ll {
-    font-size: 60px;
+    font-size: 55px;
 }
 .fs-l {
     font-size: 50px;
+}
+.fs-ml {
+    font-size: 45px;
 }
 .fs-m {
     font-size: 40px;
 }
 .fs-s {
+    font-size: 24px;
+}
+.fs-ss {
     font-size: 20px;
 }
 .fw-b {
@@ -103,6 +140,19 @@ th, td {
 }
 .fc-red {
     color: red;
+}
+
+.code-l .remark-code-line {
+  font-size: 30px;
+  margin-top: 5px;
+}
+.code-m .remark-code-line {
+  font-size: 24px;
+  margin-top: 4px;
+}
+.code-s .remark-code-line {
+  font-size: 16px;
+  margin-top: 3px;
 }
 
 /* margin utility classes */
@@ -250,15 +300,15 @@ th, td {
  override remark style
  */
 .remark-slide-content {
-    background-color: #203040;
+    background-color: #fef6f0;
     background-size: cover !important;
     background-position: center !important;
-    color: #FEF6EE;
+    color: rgba(0, 0, 0, 0.75);
     font-size: 30px;
     padding: 20px 80px;
 }
 .remark-code {
-    font-size: 15px;
+    font-size: 20px;
 }
 .remark-code, .remark-inline-code {
     font-family: 'Ubuntu Mono';
