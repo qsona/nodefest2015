@@ -155,9 +155,7 @@ ex) Quest マスタ
 対策:
 - 起動時にソートし、別に保持
   - indexの代わり
-
-- クエリが固定なら、起動時に検索を行い<br>
-それを保持
+- クエリが固定なら、起動時に検索を行いそれを保持
 
 ---
 # 注意点と対策 (2)
@@ -272,7 +270,8 @@ function sample_plain(param, callback) {
 - 定義されていない関数は、非同期メソッドとして定義されているものとする
 
 ---
-# .fs-m[async.series コード例]
+## .fs-m[async.series コード例]
+
 ```javascript
 function sample_series(param, callback) {
   var num, text;
