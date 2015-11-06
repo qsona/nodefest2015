@@ -14,7 +14,7 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 
-['js', 'img'].forEach(function(dir) {
+['js', 'img', 'css', 'fonts'].forEach(function(dir) {
   app.use('/' + dir, express.static('src/' + dir));
 });
 
