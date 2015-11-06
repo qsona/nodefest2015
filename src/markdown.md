@@ -230,6 +230,9 @@ callback スタイル
 - 非同期関数の最後の引数にcallback
 - callbackの第1引数はError Object<br>(エラーでなければnull or undefined)
 
+???
+簡単にとばす
+
 ---
 # 同期コード例
 .code-l[
@@ -270,6 +273,8 @@ function sample_plain(param, callback) {
 ```
 ]
 
+???
+callback地獄
 ---
 # 非同期コード(plain)の問題点
 - if (err) 句が無駄に多い
@@ -287,7 +292,7 @@ function sample_plain(param, callback) {
 ---
 # asyncについて
 
-直列な非同期コードを書き換える方法がいくつか存在
+直列な非同期コードを平たい形に書き換える方法が<br>いくつか存在
 
 .list-s[
 - async.waterfall
@@ -340,6 +345,8 @@ function sample_series(param, callback) {
   });
 }
 ```
+???
+次で再掲するplainのコードと見比べてほしいんですが
 
 ---
 ```javascript
@@ -398,7 +405,13 @@ function sample_waterfall(param, callback) {
 }
 ```
 ]
+???
+先にちょっとどうさを解説すると、↓
 
+戻ってきた後
+nextが渡した先で呼ばれる説明
+
+checkNgWordは、errがあるかないか
 
 ---
 .code-title[async.waterfall の動作解説用]
@@ -425,6 +438,17 @@ function sample_waterfall1(param, callback) {
 }
 ```
 ]
+
+???
+説明
+next は単に次の関数を指すわけではなく、
+err => 最後に飛ぶ
+errなし => 引数をずらす
+
+=> 前のスライドと比較
+
+当たり前のように見えてなぜ我々がここにたどりつかなかったかというと、
+関数の区切りが意味の区切りになってないから
 
 ---
 # async.waterfallの問題点
@@ -491,6 +515,9 @@ function sample_waterfall(param, callback) {
 }
 ```
 .fs-s[`checkNgWord`の修正により、`sample_waterfall`が動かなくなっている]
+
+???
+このcheckNgWordの仕様変更は、同期コードで考えるとどういうことかというと
 
 ---
 .code-title[コード例(修正後)]
@@ -574,13 +601,21 @@ Function.length を利用している
 やや黒魔術に近い<br>
 ★★ BAD ★★
 
+???
+これが我々の辿り着いた結論
+2つの問題
+黒魔術
+jsって仮引数宣言する必然性が本当はない
+これ、覚えたい？
+覚えたかったら僕とsuguruと友だちになれる
+これをBADと言ったら僕の2年間はなんだったんだろうとなるが・・
+
 ---
 # .fs-m[async.waterfall の問題点 (2)]
 
-- 関数の区切りが意味の区切りにならないことがある
-  - フローにif文が入ると辛い
+- フローにif文が入ると辛い
 
-- neo-async.angelFall も同じ
+※ neo-async.angelFall も同じ
 
 ---
 # 同期コード例
@@ -597,6 +632,10 @@ function sample_sync(param) {
 }
 ```
 ]
+???
+説明する
+
+yとzは並列でとれる
 ---
 .code-title[非同期コード例(良くない)]
 ```javascript
@@ -608,7 +647,7 @@ function sample_async(param, callback) {
     },
     function(_x, next) {
       x = _x;
-      if (!x) {
+*     if (!x) {
         return next();
       }
       async.parallel({
@@ -617,7 +656,7 @@ function sample_async(param, callback) {
       }, next);
     },
     function(result, next) {
-      if (!x) {
+*     if (!x) {
         return next();
       }
       doSomething(result.y, result.z, next);
@@ -628,6 +667,10 @@ function sample_async(param, callback) {
   ], callback);
 }
 ```
+???
+非同期をplainではそもそもかなり書きにくい
+
+if文, 並列が入ったらplainむずい
 ---
 # 良くない理由
 
@@ -639,7 +682,10 @@ function sample_async(param, callback) {
 GOTOが欲しくなる
 
 ★★★★ BAD ★★★★
+???
+double next()したい
 
+ってかむしろラベル貼ってGOTOしたい
 ---
 # まとめ
 
@@ -689,6 +735,8 @@ function sample_asyncblock(param, callback) {
 }
 ```
 ]
+???
+コードの説明は時間ないからとばす
 
 ---
 # asyncblock の技術
@@ -712,6 +760,13 @@ function sample_asyncblock(param, callback) {
 正規なやり方で、このレベルになってほしい
 
 .right[...to be continued.]
+
+???
+ES2015以降はまだ枯れていないので、まだ茨の道だと思う
+
+長かったが以上です
+
+BAD感、伝わりましたか？
 
 ---
 class: center, middle
@@ -760,6 +815,9 @@ class: center, middle
 - ほぼ全てのロジックが services/ に置かれる
 - モデルが作られることが少ない
   - つまり、オブジェクト指向ではない
+
+???
+ドメインモデル貧血症
 
 ---
 # そうなる理由
@@ -825,23 +883,24 @@ services/ に全部書くのが80%の場合楽
 
 ---
 # モデルを利用すべき場面
-ゲームの中心的な部分の実装では<br>
+- ゲームの中心的な部分の実装では<br>
 モデルを利用したほうが良いことが多かった
-- バトルゲームのバトル
-- パズルゲームのパズル
+  - バトルゲームのバトル
+  - パズルゲームのパズル
 
-ブラウザゲームならフロントとロジック共通化も
-- JavaScriptの旨味がある
+- ブラウザゲームならフロントとロジック共通化も
+  - JavaScriptの旨味がある
 
 ---
 # まとめ
 
-オブジェクト指向と非同期呼び出しにミスマッチの問題がある
+- ゲーム固有の問題
+- 非同期呼び出しの問題
 
 ---
 class: center, middle
-# .fs-m[BAD No.2.5]
-# .fs-l[グローバル変数の上書き]
+## .fs-m[BAD No.2.5]
+# .fs-l[グローバル変数 Date の上書き]
 
 ---
 # .fs-m[グローバル変数 Date の上書き]
@@ -929,6 +988,7 @@ Fork & Star me on Github!!
   - 行儀が悪い行為には危険がある
   - prototype拡張とぶつかった話
 
+---
 ![](./img/dora.png)
 
 ---
@@ -938,60 +998,39 @@ Fork & Star me on Github!!
 - 本番だったら超very badノウハウ
 
 ---
-# 少し技術的な話
-Dateの挙動
-new Date() => オブジェクトが返る
-Date() => 文字列が返る
-
-```javascript
-new Date() // (Date object)
-Date() // 'Thu Nov 05 2015 12:58:51 GMT+0900 (JST)'
-```
-
-そんな挙動を作ることは可能なのか？
+class: center, middle
+## .fs-m[BAD No.3]
+# .fs-m[process.on('uncaughtException')]
+## .fs-m[...そして何もなかったように続行]
 
 ---
-# 少し技術的な話 (2)
-A.可能
+# .fs-m[process.on('uncaughtException')]
+## .fs-m[...そして何もなかったように続行]
+.kakuzuke.m80-t[
+|unused--|unused|
+|--------|------|
+|Bad度   |★★★★★ |
+|Node度  |★★★★★ |
+|ゲーム度|★★☆☆☆ |
+|かたさ  |ふつう|
+]
 
-new 演算子の挙動
-new X(); すると
-- returnされたもののtypeofが'object'のとき、それをそのまま返す
-- そうでないとき、X.prototypeをプロトタイプにもつオブジェクトを返す
-
-```javascript
-function X() { this.x = 1; return 'string'; }
-X(); // => 'string'
-new X(); // => { x: 1 }
-```
-
-time-masterのWrappedDateは<br>この挙動だけ真似できていない
-
----
-3
-process.on('uncaughtException')
-...そして何もなかったように続行
-
----
-# .fs-m[process.on('uncaughtException')<br>...そして何もなかったように続行]
-Bad度★★★★★
-Node度★★★★★
-ゲーム度★★☆☆☆
-かたさ: ふつう
-
+???
 超ベリーバッドノウハウ
 
 ---
 # 背景
-Node.jsにおいて例外がthrowされた場合、プロセスが終了する
+Node.jsにおいて例外がthrowされた場合、<br>プロセスが終了する
 - サーバ自体が終了する
-- cluster利用時は、発生したworkerが終了
-普通は、終了を検知して再起動する(pm2など)
+- cluster利用時は、発生したworkerが終了<br>
+  - 普通は、終了を検知して再起動する(pm2など)
 
 ![不正な処理](http://homepage2.nifty.com/t-okano/rok/rok/lecture/errwin1.gif)
 
 ---
-# 再起動に時間がかかる
+# 再起動するとどうなるか
+
+再起動には時間がかかる
 
 特にマスターデータの影響
 - DBから読み込んでプロセスにのせる
@@ -999,19 +1038,19 @@ Node.jsにおいて例外がthrowされた場合、プロセスが終了する
 - Object.freezeをdeepに行う
 
 ---
-# とある日のstg起動ログ(抜粋)
+.code-title[とある日の再起動ログ(抜粋)]
 
 ```
 19:53:51 info initialize modules
-19:53:52 info configure master cache
-19:53:52 info loading master cache
+19:53:52 info configure master
+19:53:52 info loading master
 19:53:55 info [masterchanger] change masterdata: enemy
 19:53:55 info [masterchanger] change masterdata: gacha
 19:53:56 info [masterchanger] added master: combination_skill_hash
 19:53:56 info [masterchanger] added master: item_by_type
 19:53:56 warn [masterchanger] deleted 34 keys from notice
 19:53:57 warn [masterchanger] added 2820 keys to enemy_skill
-19:53:57 info loading master cache and changing master: done. time: 4882 ms
+19:53:57 info loading master / changing master: done. time: 4882 ms
 19:53:57 info freezing master
 19:54:11 info freezing master: done. time: 14253 ms
 19:54:12 info Start to initialize NewRelic.
@@ -1027,19 +1066,20 @@ Node.jsにおいて例外がthrowされた場合、プロセスが終了する
 
 1. あるユーザのデータが壊れる + バグによりTypeError発生
 2. そのユーザがリクエストする度に発生する
-3. 1秒に1回再起動=>到底間に合わない
+3. 再起動が連続でかかり、到底間に合わない
 4. 全ユーザが利用不能に
 
 ---
 # そこで
 
-エラーが起きても、プロセスを終了しないようにしたい
+.fs-m[エラーが起きても、プロセスを終了しないようにしたい]
 
 ---
 # やり方 1
 uncaughtExceptionをハンドルする
 
 起動時に呼ばれるコードで
+.code-l[
 ```javascript
 process.on('uncaughtException', function(err) {
   console.log(err);
@@ -1047,11 +1087,13 @@ process.on('uncaughtException', function(err) {
   // 終了はしない
 });
 ```
+]
 ---
-# やり方 2
-domainを利用する
+.code-title[やり方 2]
 
+domainを利用する<br>
 例えばExpressのミドルウェアに次のものを入れる
+.code-l[
 ```javascript
 var domain = require('domain');
 // middleware
@@ -1064,12 +1106,15 @@ function(req, res, next) {
   d.run(next);
 }
 ```
+]
 
 ---
 # やり方1と2の比較
-- domain を使うとリクエストの情報が落ちないで済む
+.list-m[
+- domain を使うと、リクエストの情報が落ちないで済む
   - ちゃんとレスポンスを返せる
   - ユーザ情報をログに出せる
+]
 
 ---
 # だめ 1
@@ -1090,11 +1135,7 @@ Error Handling in Node.js
 Joyent 公式のドキュメント
 
 ---
-# Why BAD?
-何由来か全く不明なエラーを、握りつぶしている
-
----
-だめといわれても
+![](./img/sou.png)
 
 ---
 # キャッチしないと起こる現象
@@ -1117,6 +1158,10 @@ https://twitter.com/axross_/status/653732904137134080
 ---
 # 閑話休題
 「あるべき論」をもう少し深くやる必要がある
+
+---
+# Why BAD?
+何由来か全く不明なエラーを、握りつぶしている
 
 - そもそもcallback(err)とthrow err使い分けられんのか
   - 同期関数はcallbackで通知できない
