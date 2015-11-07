@@ -17,6 +17,8 @@ hollow
 ???
 子供大好き、 Node.jsと子育てってタイトルで話したいくらい
 
+来年そうしようかな
+
 ---
 # はじめに
 
@@ -60,11 +62,7 @@ Node.jsを採用しませんか？
 # 今日の仮説
 .fs-l[Node.js、サーバサイド開発に<br>向いてないのでは？]
 
----
-# 今日の仮説
 (元も子もないようだが)割と一般的な意見
-https://twitter.com/teppeis/status/545940492219727873
-http://mizchi.hatenablog.com/entry/2014/10/08/003228
 
 ---
 # 個人的な見解
@@ -72,7 +70,7 @@ http://mizchi.hatenablog.com/entry/2014/10/08/003228
 - でも、それを補って余りある魅力もある
 
 あえて「バッドノウハウ」をテーマにして、<br>
-その難しさ、苦労感を伝えたい
+Node.jsサーバ運用の<br>難しいところ、苦労感を伝えたい
 
 ---
 # バッドノウハウとは？
@@ -83,6 +81,9 @@ http://mizchi.hatenablog.com/entry/2014/10/08/003228
 - あまり覚えたくないノウハウ
 - 本来やりたくない(けど仕方ない)手法
 
+???
+バッドノウハウの定義
+
 ---
 # 本セッションのコンテキスト
 - ゲームのAPIサーバ開発に限って論じる
@@ -90,11 +91,7 @@ http://mizchi.hatenablog.com/entry/2014/10/08/003228
   - サーバ開発一般に通じる話が多いはず
 
 - ECMAScript5 までに限定する
-
----
-# 本題の前に
-.fs-m[ゲームサーバ開発の特徴を挙げる]
-
+  - 現場の泥臭い話が中心
 ---
 # ゲームサーバの特徴
 - 定型的なAPIが少ない
@@ -140,6 +137,8 @@ class: center, middle
 問題: callback 地獄
 
 解決法(一旦): neo-async.angelFall
+
+.fs-ss[速報: コールバックスタイルは過去のものに…]
 
 ???
 これだけだと何がBADか分からないと思うが、<br>
@@ -362,6 +361,8 @@ errなし => 引数をずらす
 当たり前のように見えてなぜ我々がここにたどりつかなかったかというと、
 関数の区切りが意味の区切りになってないから
 
+???
+7min
 ---
 # async.waterfallの問題点
 
@@ -615,6 +616,8 @@ double next()したい
 - deferした場合、その結果が次に使われるところで処理を待つ
   - asyncだと `async.auto` が少し近い
 
+???
+10min
 ---
 .code-title[asyncblock コード例]
 .code-m[
@@ -669,7 +672,7 @@ function sample_asyncblock(param, callback) {
 
 いずれも Promise(ES2015) 前提
 
-決定版はまだ無いように思う
+Node.js上での決定版はまだ無いように思う
 
 
 ???
@@ -694,6 +697,9 @@ BAD感、伝わりましたか？
 
 マスターデータに関するノウハウ
 
+???
+13min
+
 ---
 # .fs-m[マスターデータにまつわる話]
 
@@ -713,7 +719,11 @@ Final Fantasy Record Keeperのマスターデータを支える技術<br>
 <cite>http://www.slideshare.net/dena_study/final-fantasy-record-keeper</cite>
 ]
 
-.fs-m[今回は、Node.jsサーバアプリ上での<br>利用の話をする]
+
+---
+# 概要
+マスターデータを<br>
+アプリ上でうまく利用するためのノウハウ
 
 ---
 # マスターデータの利用
@@ -772,9 +782,7 @@ ex) Quest マスタ
   - 変更しようとした瞬間にTypeError
 ]
 
----
-class: center, middle
-# .fs-l[(普通のノウハウはここまで)]
+??? 15m
 ---
 class: center, middle
 ## .fs-m[BAD No.2]
@@ -798,7 +806,7 @@ class: center, middle
 .list-m[
 - データはそのまま扱い、モデル化しない
   - ORMなどを利用しない
-- 「サービス層」にすべてのロジックを書く<br>
+- 「サービス層」にすべてのロジックを書く
 ]
 
 ---
@@ -856,7 +864,7 @@ DBアクセスで、単なるデータオブジェクトを受け取る
 
 ---
 # モデルを作るのが大変 (2)
-モデルを作るには、以下のコードが必要
+モデルを作る時、たいてい以下のコードが必要
 - 初期化処理<br>(DBからのデータとマスターデータを混合させる)
 - フロントへ返却する形に変換する処理
 - DBへupdateする形に変換する処理
@@ -871,9 +879,31 @@ DBアクセスで、単なるデータオブジェクトを受け取る
 
 ---
 # .fs-m[非同期処理がモデルに混ざると辛い問題]
-コールバックスタイルが、オブジェクト指向と壊滅的にマッチしない
+- コールバックスタイルとオブジェクト指向を<br>
+マッチさせるのが難しい
+  - 一つ非同期メソッドがあれば、全部非同期メソッドになる覚悟が必要
 
-一つ非同期メソッドがあれば、全部非同期メソッドになる覚悟が必要
+---
+.code-title[コード例]
+
+.code-l[
+```javascript
+function Car() { /* ... */ };
+Car.prototype.drive = function() { /* ... */ };
+Car.prototype.play = function() {
+  this.drive();
+};
+
+function Sagawa() { /* ... */ }
+util.inherits(Sagawa, Car);
+Sagawa.prototype.play = function() {
+* this.tel();
+  this.drive();
+};
+```
+]
+
+.fs-s[Sagawa#telが非同期呼び出しになると、Car#playが非同期になる]
 
 ---
 # 非同期呼び出しが出来ないと
@@ -905,11 +935,10 @@ services/ に全部書くのが80%の場合楽
 - ブラウザゲームならフロントとロジック共通化も
   - JavaScriptの旨味がある
 
----
-# まとめ
+???
+まとめきれていない
 
-- ゲーム固有の問題
-- 非同期呼び出しの問題
+20min
 
 ---
 class: center, middle
@@ -929,10 +958,9 @@ class: center, middle
 ]
 ---
 # 概要
-Date を上書きする
+問題: 時刻を操りたい
 
-- Date =
-- (global.Date =)
+解決法: Date を上書きする
 
 ---
 # 背景
@@ -961,6 +989,8 @@ Date を上書きする
 ---
 # そこで
 JavaScriptの Date を変更する
+- Date =
+- (global.Date =)
 
 変更内容:
 - new Date() (引数なし)
@@ -1005,12 +1035,8 @@ Fork & Star me on Github!!
 ---
 ![](./img/dora.png)
 
----
-# How BAD?
-
-- ステージング環境までなので、バッドくらい
-- 本番だったら超very badノウハウ
-
+???
+22min
 ---
 class: center, middle
 ## .fs-m[BAD No.3]
@@ -1033,6 +1059,14 @@ class: center, middle
 超ベリーバッドノウハウ
 
 ---
+# 概要
+問題: 予期せぬエラーの発生時、<br>
+サーバが終了してしまう
+
+解決法: `process.on('uncaughtException')`<br>
+(または domain の利用)
+
+---
 # 背景
 Node.jsにおいて例外がthrowされた場合、<br>プロセスが終了する
 - サーバ自体が終了する
@@ -1046,7 +1080,7 @@ Node.jsにおいて例外がthrowされた場合、<br>プロセスが終了す�
 
 再起動には時間がかかる
 
-特にマスターデータの影響
+(ゲームの場合)特にマスターデータの影響
 - DBから読み込んでプロセスにのせる
 - 使いやすい形に変形
 - Object.freezeをdeepに行う
@@ -1131,12 +1165,12 @@ function(req, res, next) {
 ]
 
 ---
-# だめ 1
+# だめ 1 (API docs)
 ![](./img/uncaught.png)
 <cite>https://nodejs.org/api/process.html#process_event_uncaughtexception</cite>
 
 ---
-# だめ 2
+# だめ 2 (API docs)
 ![](./img/domain.png)
 <cite>https://nodejs.org/api/domain.html#domain_warning_don_t_ignore_errors</cite>
 
@@ -1155,13 +1189,12 @@ Joyent 公式のドキュメント
 # キャッチしないと起こる現象
 - TypeError を出すと即障害になる
 - TypeError を出さないことが正義
-- a && a.b && a.b.c のような書き方が流行る(不必要であっても)
+- TypeError を全く出さないのは難しい
+- a && a.b && a.b.c のような書き方が流行る<br>(不必要であっても)
   - 「ナチュラルな握りつぶし」
 
----
-# 余談: neo-async 誕生秘話
-http://suguru03.github.io/slide/20151008_neo-async/#23
-https://twitter.com/axross_/status/653732904137134080
+???
+TypeErrorを出すのはプログラマの過失だが、過失に対する罰が大きすぎる
 
 ---
 # 余談: neo-async 誕生秘話
@@ -1170,36 +1203,62 @@ https://twitter.com/axross_/status/653732904137134080
 3. neo-asyncの誕生!!
 
 ---
-# 閑話休題
-「あるべき論」をもう少し深くやる必要がある
-
----
 # Why BAD?
 何由来か全く不明なエラーを、握りつぶしている
 
-- そもそもcallback(err)とthrow err使い分けられんのか
-  - 同期関数はcallbackで通知できない
-- 非同期関数中でcallback(err)出来なくて困る
-- try-catch強力過ぎる問題
+予期せぬエラーにより、状態が不定に
+- ステートの変更が中途半端で終わるなど
+- リクエストスレッドがないので、<br>
+アプリ自体に影響しうる
 
 ---
-# そもそもcallback(err)とthrow err使い分けられんのか問題
+# callback(err) と throw err
 
-express try-catchしてる
+- 基本的に、バグでない例外は<br>callback(err)で通知すべき
+- try-catch は JSON.parse/stringify等だけ使う
+  - 同期関数は…？
+  - return Errorする？
 
 ---
-# 非同期関数中でcallback(err)出来なくて困る問題
+# 議論を深めたい
+- callback(err)とthrow errの使い分け？
+  - 単純に「通常の例外/バグ」とは区別できない
+- 非同期関数中でcallback(err)出来なくて困る話
+- try-catch強力過ぎる
 
+???
+co 使うと try-catchになる
 ---
-# try-catch強力過ぎる問題
-- ReferenceErrorとか
+# 議論を深めたい
+- 「終了すべきエラー」を明確にできないか？
+  - できればTypeErrorは含まれないでほしい
 
-例外 Advent Calendarに期待してる
+- 全てではなく、「ここまで終了」のような仕組み？
+  - 起動時のセットアップはそのまま
+  - それ以外のものは全部リセット
 
 ---
 # まとめ
-結論、問題になるのは
+- 今回紹介したのは、やってはいけない手法である
+- とはいえ、現状やらないとサーバ運用辛い
+- 議論を深め、正しいやり方で明確
+  - 例外 Advent Calendarに期待してる
+
+---
+# まとめ
+結論、サーバサイドの開発で問題になるのは
 - 非同期フロー制御
 - エラー処理
+
 古くて新しい話題
+
 ES2015, 2016やそれを含むNodeの新バージョンで解決されていくことが望まれる
+
+---
+# Thanks!
+
+contributors:
+- @HAKASHUN (Twitter)
+- @tito_net (Twitter)
+- @suguru03 (Github)
+- その他、アドバイスを頂いた皆様
